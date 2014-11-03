@@ -9,6 +9,9 @@
 program=""
 dropbox_ubuntu=""
 download_links_file="download_links"
+ubuntu_installer="sudo apt-get install "
+fedora_installer="sudo yum install "
+debian_installer="sudo apt-get install "
 int=0
 declare -a programs
 

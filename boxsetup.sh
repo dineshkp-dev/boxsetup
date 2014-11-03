@@ -9,9 +9,10 @@
 program=""
 dropbox_ubuntu=""
 download_links_file="download_links"
-ubuntu_installer="sudo apt-get install "
-fedora_installer="sudo yum install "
-debian_installer="sudo apt-get install "
+ubuntu_autoinstaller="sudo apt-get install "
+fedora_autoinstaller="sudo yum install "
+debian_autoinstaller="sudo apt-get install "
+
 int=0
 declare -a programs
 
@@ -20,30 +21,41 @@ echo "Enter the Linux Box type:"
 #read linuxDistro
 linuxDistro="ubunTU"
 
-inputfile="$1"
-echo $linuxDistro
+#check if the input text file was provided as option param
+if [[ -z $1 ]]; 
+then
+	inputfile="program.txt"
+else
+	inputfile=$1
+fi
 
+#read the input file
+#obtain the program names as 'programs' Array, size of array is 'int'
 while read -r line
 do
 	program=$line 
 	programs[ int ]=$line
 	int=$((int+1))
 done < "$inputfile"
+
 echo "The following $int programs will be installed for $linuxDistro"
 echo ${programs[*])}
-
-for program in {$programs[@]};
+#run a for loop through each of the programs
+for program in "${programs[@]}";
 do
 	echo "Program name: $program"
 done
 
 shopt -s nocasematch 
 
-awk -F':=' '{print $2}' $download_links_file;
+#get links
+val=$(awk -F':=' '{print $2}' "$download_links_file");
 
+echo "************"
+echo "value of val: ${val}"
 function ubuntu_download {
 	echo "Installing programs for Ubuntu"
-	echo "wget $programs[$int]"
+	echo "wget $programs"
 }
 
 function fedora_download {

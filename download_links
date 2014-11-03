@@ -1,2 +1,12 @@
-dropbox_ubuntu:=https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
-eclipse:=heloo
+ubuntu_dropbox_http:=https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
+ubuntu_eclipse_http:=https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz
+ubuntu_chrome_auto:=google-chrome-stable
+ubuntu_sublime_http:=http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2
+fedora_dropbox_http:=https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
+fedora_eclipse_http:=https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz
+fedora_chrome_auto:=google-chrome-stable
+fedora_sublime_http:=http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2
+debian_dropbox_http:=https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
+debian_eclipse_http:=https://www.eclipse.org/downloads/download.php?file=/technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz
+debian_chrome_auto:=google-chrome-stable
+debian_sublime_http:=http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2

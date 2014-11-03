@@ -9,42 +9,49 @@
 program=""
 dropbox_ubuntu=""
 download_links_file="download_links"
+int=0
+declare -a programs
 
 echo "Starting the box setup script."
 echo "Enter the Linux Box type:"
-#read linux_type
-linux_type="ubunTU"
-
-
+#read linuxDistro
+linuxDistro="ubunTU"
 
 inputfile="$1"
-echo $linux_type
+echo $linuxDistro
 
 while read -r line
 do
 	program=$line 
-	echo "Program name is: $line"
+	programs[ int ]=$line
+	int=$((int+1))
 done < "$inputfile"
+echo "The following $int programs will be installed for $linuxDistro"
+echo ${programs[*])}
+
+for program in {$programs[@]};
+do
+	echo "Program name: $program"
+done
 
 shopt -s nocasematch 
 
 awk -F':=' '{print $2}' $download_links_file;
 
-function ubuntu {
-	echo "Installing programs for UBUNTU"
-	echo "wget https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb"
+function ubuntu_download {
+	echo "Installing programs for Ubuntu"
+	echo "wget $programs[$int]"
 }
 
-function fedora {
-	echo "Installing programs for UBUNTU"
+function fedora_download {
+	echo "Installing programs for Fedora"
 }
 
-function debian {
-	echo "Installing programs for UBUNTU"
+function debian_download {
+	echo "Installing programs for Debian"
 }
 
-
-if [[ $linux_type == "ubuntu" ]];
+if [[ $linuxDistro == "ubuntu" ]];
 	then
-	ubuntu
+	ubuntu_download
 fi

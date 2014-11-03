@@ -28,7 +28,7 @@ done < "$inputfile"
 
 shopt -s nocasematch 
 
-awk -F: '{print $2}' $download_links_file
+awk -F':=' '{print $2}' $download_links_file;
 
 function ubuntu {
 	echo "Installing programs for UBUNTU"

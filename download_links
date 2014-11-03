@@ -1,2 +1,2 @@
-dropbox_ubuntu:https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
-eclipse:heloo
+dropbox_ubuntu:=https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
+eclipse:=heloo

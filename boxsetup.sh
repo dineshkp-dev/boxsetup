@@ -22,10 +22,6 @@ debian_autoinstaller="sudo apt-get install "
 # rpm
 # deb
 
-int=0
-declare -a programs
-declare -a download_links
-declare -a ubuntu_download_links
 
 
 # Check if the input text file was provided as option param;
@@ -67,16 +63,9 @@ function printAllPrograms {
 
 shopt -s nocasematch 
 
-# Get links
-#val=$(awk -F':=' '{print $2}' "$download_links_file");
-#for eachVal in $(val[@])
-#do
-#	echo $eachVal
-#done
-
 function readDownloadLinksFile {
 	echo "--------------------------------------"
-	echo "	Reading the download links file '$download_links_file'"
+	echo "	Parsing the download links file '$download_links_file'"
 	IFS=$'\n'
 	int=0
 	while read -r line
@@ -87,13 +76,12 @@ function readDownloadLinksFile {
 		
 	done < "$download_links_file" 
 
-	echo "The following $int programs will be installed for $linuxDistro"
+	echo "Succesfully obtained information about ${int} installers."
 	
-	for downloadsEntry in ${download_links[@]}
-	do
-		echo $downloadsEntry
-	done
-	download_links[@]
+#	for downloadsEntry in ${download_links[@]}
+#	do
+#		echo $downloadsEntry
+#	done
 }
 
 function ubuntu_download {
@@ -103,18 +91,24 @@ function ubuntu_download {
 
 function get_ubuntu_downloads_list {
 	
-	counter=0
+	local counter=0
 	echo "Getting the list of programs for Ubuntu..."
+	
+	#declare -a download_links
+	#download_links=$1
+	#echo ${download_links[@]}
 	for downloadsEntry in ${download_links[@]}
 	do
-		if [ downloadsEntry == "ubuntu" ]
+		distro=$(echo $downloadsEntry | awk -F'_' {'print $1'})
+		if [ $distro == "ubuntu" ]
 		then
-			ubuntu_download_links[ $counter ] = ${downloadsEntry}
-			counter=$(counter+1)
-			echo $counter
+			ubuntu_download_links[ counter ]=${downloadsEntry}
+			counter=$((counter+1))
 		fi
 	done
-	for ubuntu_entry in $(ubuntu_download_links[@])
+
+	echo "Found '${counter}' programs for Ubuntu."
+	for ubuntu_entry in ${ubuntu_download_links[@]}
 	do
 		echo $ubuntu_entry
 	done
@@ -130,6 +124,10 @@ function debian_download {
 }
 
 
+int=0
+declare -a programs
+declare -a download_links
+declare -a ubuntu_download_links
 
 
 # No Function calls should be defined below this, to provide clarity.
@@ -142,7 +140,8 @@ echo "User entered: '$linuxDistro'"
 
 
 readProgramfile $inputfile
-download_links=readDownloadLinksFile
+readDownloadLinksFile
+#echo ${download_links[@]}
 #printAllPrograms
 
 
@@ -150,7 +149,8 @@ download_links=readDownloadLinksFile
 
 if [[ $linuxDistro == "ubuntu" ]];
 	then
-		get_ubuntu_downloads_list
+		get_ubuntu_downloads_list ${download_links[@]}
 		ubuntu_download
+		echo "Again....................................."
 fi
 shopt -u nocasematch

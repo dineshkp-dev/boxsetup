@@ -77,21 +77,23 @@ function readDownloadLinksFile {
 	done < "$download_links_file" 
 
 	echo "Succesfully obtained information about ${int} installers."
-	
-#	for downloadsEntry in ${download_links[@]}
-#	do
-#		echo $downloadsEntry
-#	done
+	# Enable the below for debugging
+	# for downloadsEntry in ${download_links[@]}
+	# do
+	# echo $downloadsEntry
+	# done
 }
 
 function ubuntu_download {
 	echo "Installing programs for Ubuntu"
-	echo "wget $programs"
+	echo "wget ${programs[@]}"
 }
 
 function get_ubuntu_downloads_list {
 	
 	local counter=0
+	local distro=""
+	local program_name=""
 	echo "Getting the list of programs for Ubuntu..."
 	
 	#declare -a download_links
@@ -100,27 +102,43 @@ function get_ubuntu_downloads_list {
 	for downloadsEntry in ${download_links[@]}
 	do
 		distro=$(echo $downloadsEntry | awk -F'_' {'print $1'})
-		if [ $distro == "ubuntu" ]
-		then
-			ubuntu_download_links[ counter ]=${downloadsEntry}
-			counter=$((counter+1))
-		fi
+		program_name=$(echo $downloadsEntry | awk -F'_' {'print $2'})
+		for program in ${programs[@]}
+		do
+			if [[ "${distro}" == "ubuntu" ]] && [[ "${program_name}" == "${program}" ]]
+			then
+				ubuntu_download_links[ counter ]=${downloadsEntry}
+				echo "Found entry for program: ${program} ,for distro: ${distro};"
+				counter=$((counter+1))
+			fi
+		done
 	done
 
 	echo "Found '${counter}' programs for Ubuntu."
-	for ubuntu_entry in ${ubuntu_download_links[@]}
-	do
-		echo $ubuntu_entry
-	done
+	# Enable the below for debugging
+	#for ubuntu_entry in ${ubuntu_download_links[@]}
+	#do
+	#	echo $ubuntu_entry
+	#done
 	#echo "wget $programs"
 }
 
-function fedora_download {
-	echo "Installing programs for Fedora"
-}
-
-function debian_download {
-	echo "Installing programs for Debian"
+function ubuntu_install {
+	echo "Installing programs for Ubuntu"
+	echo "wget ${programs[@]}"
+	local installer_type=""
+	local program_name=""
+	local counter=0
+	for ubuntu_entry in ${ubuntu_download_links[@]}
+	do
+		program_name=$(echo $ubuntu_entry | awk -F'_' {'print $2'})
+		installer_type=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $1'})
+		ubunutu_downloads_program_name[counter]=$program_name
+		ubunutu_downloads_installer_type[counter]=$installer_type
+		# echo ${ubunutu_downloads_installer_type[counter]}
+		# echo ${ubunutu_downloads_program_name[counter]}
+		counter=$((counter+1))
+	done
 }
 
 
@@ -128,6 +146,8 @@ int=0
 declare -a programs
 declare -a download_links
 declare -a ubuntu_download_links
+declare -a ubunutu_downloads_program_name
+declare -a ubunutu_downloads_installer_type
 
 
 # No Function calls should be defined below this, to provide clarity.
@@ -150,7 +170,8 @@ readDownloadLinksFile
 if [[ $linuxDistro == "ubuntu" ]];
 	then
 		get_ubuntu_downloads_list ${download_links[@]}
-		ubuntu_download
+		#ensure that only the required programs are selected...
+		ubuntu_install
 		echo "Again....................................."
 fi
 shopt -u nocasematch

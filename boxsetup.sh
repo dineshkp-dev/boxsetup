@@ -150,6 +150,18 @@ function get_ubuntu_install_details {
 	num_of_programs_to_install=$counter
 }
 
+function ubuntu_auto_install {
+	echo "Installing applications for Ubuntu using '${ubuntu_autoinstaller} $1'"
+	eval echo ${ubuntu_autoinstaller} $1 # Must remove the 'echo' to ensure proper command.
+	if [[ $? ]]
+	then
+		echo "Installed chrome Succesfully."
+	else
+		echo "Some exception occured while trying to install '$1'"
+		exit -1
+	fi
+}
+
 function ubuntu_install {
 	echo "Installing Programs : ${num_of_programs_to_install}."
 	local i=0
@@ -161,7 +173,8 @@ function ubuntu_install {
 			echo "http query"
 		elif [[ ${ubunutu_downloads_installer_type[i]} == auto ]]
 		then
-			echo "auto install for ubunut : apt-get"
+			echo "auto install for ubuntu : apt-get"
+			ubuntu_auto_install ${ubunutu_installer_location[i]}
 		fi
 		i=$((i+1))
 	done
@@ -172,10 +185,10 @@ function ubuntu_install {
 int=0
 declare -a programs
 declare -a download_links
-declare -a ubuntu_download_links
-declare -a ubunutu_downloads_program_name
-declare -a ubunutu_downloads_installer_type
-declare -a ubunutu_installer_location
+declare -a ubuntu_download_links # contains the narrowed down list (based on the 'distro' and User preference) of links
+declare -a ubunutu_downloads_program_name # Holds an array of names of programs for an item from 'download_links' file
+declare -a ubunutu_downloads_installer_type # Holds an array of installer types for an item from 'download_links' file
+declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
 num_of_programs_to_install=0
 user_requested_program_count=0
 

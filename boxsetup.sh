@@ -13,6 +13,7 @@ download_links_file="download_links"
 ubuntu_autoinstaller="sudo apt-get install "
 fedora_autoinstaller="sudo yum install "
 debian_autoinstaller="sudo apt-get install "
+http_downloads_log_file="installation.log"
 # Defining the different types of downloadable file formats
 # tar
 # tar.gz
@@ -162,6 +163,11 @@ function ubuntu_auto_install {
 	fi
 }
 
+function http_wget_download {
+	echo "Downloading files for '$1' from '$2'"
+	wget -da $http_downloads_log_file -nc $2 -O $1
+}
+
 function ubuntu_install {
 	echo "Installing Programs : ${num_of_programs_to_install}."
 	local i=0
@@ -170,10 +176,9 @@ function ubuntu_install {
 		echo "${ubunutu_downloads_program_name[i]}, ${ubunutu_downloads_installer_type[i]}, ${ubunutu_installer_location[i]}"
 		if [[ ${ubunutu_downloads_installer_type[i]} == http ]]
 		then
-			echo "http query"
+			http_wget_download ${ubunutu_downloads_program_name[i]} ${ubunutu_installer_location[i]}
 		elif [[ ${ubunutu_downloads_installer_type[i]} == auto ]]
 		then
-			echo "auto install for ubuntu : apt-get"
 			ubuntu_auto_install ${ubunutu_installer_location[i]}
 		fi
 		i=$((i+1))

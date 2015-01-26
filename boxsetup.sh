@@ -165,7 +165,7 @@ function ubuntu_auto_install {
 
 function http_wget_download {
 	echo "Downloading files for '$1' from '$2'"
-	wget -da $http_downloads_log_file -nc $2 -O $1
+	wget -P ${installation_directory} -da ${http_downloads_log_file}_$1 -nc $2
 }
 
 function ubuntu_install {
@@ -196,6 +196,7 @@ declare -a ubunutu_downloads_installer_type # Holds an array of installer types 
 declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
 num_of_programs_to_install=0
 user_requested_program_count=0
+installation_directory="/tmp/boxsetup/"
 
 
 # No Function calls should be defined below this, to provide clarity.
@@ -224,6 +225,8 @@ if [[ $linuxDistro == "ubuntu" ]];
 		echo "*****************"
 		echo "Obtained the programs to install and their install/download details from the respective files."
 		echo "now selecting the type of installer/downloader to use"
+		echo "Creating an installation directory at '${installation_directory}' "
+		mkdir ${installation_directory}
 		ubuntu_install
 
 fi

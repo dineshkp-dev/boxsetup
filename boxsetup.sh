@@ -46,6 +46,16 @@ else
 	inputfile=$1
 fi
 
+# The set_dir function checks if a directory exists, 
+#if it doesnt exist, it creates
+function set_dir {
+	if [ ! -d "$1" ]
+		then
+		echo "Directory did not exist, creating new directory $1"
+		mkdir -p "$1"
+	fi
+}
+
 # Read the input file
 # Obtain the program names as 'programs' Array, size of array is 'int'
 function readProgramfile {
@@ -64,7 +74,6 @@ function readProgramfile {
 		echo ${programs[int]}
 		int=$((int+1))
 	done 
-
 	user_requested_program_count=$int
 }
 
@@ -160,7 +169,7 @@ function get_ubuntu_install_details {
 
 function ubuntu_auto_install {
 	echo "Installing applications for Ubuntu using '${ubuntu_autoinstaller} $1'"
-	eval echo ${ubuntu_autoinstaller} $1 # Must remove the 'echo' to ensure proper command.
+	sh echo ${ubuntu_autoinstaller} $1 # Must remove the 'echo' to ensure proper command.
 	if [[ $? ]]
 	then
 		echo "Installed chrome Succesfully."
@@ -168,6 +177,16 @@ function ubuntu_auto_install {
 		echo "Some exception occured while trying to install '$1'"
 		exit -1
 	fi
+}
+
+function make_program_cli_accessible {
+	# Function to add a soft-link to the program's executable bin/jar/sh
+	# Note: auto installed programs DO NOT call this function
+}
+
+function create_desktop_icon {
+	# Function to create a desktop icon for the program
+	# Note: auto installed programs DO NOT call this function
 }
 
 function http_wget_download {
@@ -187,7 +206,7 @@ function http_wget_download {
 	# TODO remove downloaded dirs/files
 	# rm -rf "${temp_downloads_dir}/*"
 	# TODO move extracted files to /bin or user defined directory
-	mv "$temp_extract_dir" 
+	mv "$temp_extract_dir" "$program_install_dir"
 
 }
 
@@ -203,17 +222,12 @@ function ubuntu_install {
 		elif [[ ${ubunutu_downloads_installer_type[i]} == auto ]]
 		then
 			ubuntu_auto_install ${ubunutu_installer_location[i]}
+		else
+			echo "Unknown Installer type encountered, please check the installation file."
+			exit -1
 		fi
 		i=$((i+1))
 	done
-}
-
-function check_if_dir_exists {
-	if [ ! -d "$1" ]
-		then
-		echo "Directory did not exist, creating new directory $1"
-		mkdir -p "$1"
-	fi
 }
 
 # No Function calls should be defined below this, to provide clarity.
@@ -225,21 +239,15 @@ linuxDistro="ubuntu"
 echo "User entered: '$linuxDistro'"
 echo "Enter the location for the programs to be installed :"
 #read program_install_dir
-program_install_dir=tempdir #hardcoded temporary location
+program_install_dir="tempdir/" #hardcoded temporary location
 # if the directory doesnt exist, create one
-if [ ! -d "$program_install_dir"]
-	then
-	mkdir -p "$program_install_dir"
-fi
+set_dir "$program_install_dir"
 
 readProgramfile $inputfile
 readDownloadLinksFile
 
 #echo ${download_links[@]}
 #printAllPrograms
-
-
-
 
 if [[ $linuxDistro == "ubuntu" ]];
 	then
@@ -250,9 +258,8 @@ if [[ $linuxDistro == "ubuntu" ]];
 		echo "Obtained the programs to install and their install/download details from the respective files."
 		echo "now selecting the type of installer/downloader to use"
 		echo "Creating an installation directory at '${temp_downloads_dir}' "
-		mkdir ${temp_downloads_dir}
-		mkdir ${temp_extract_dir}
+		set_dir ${temp_downloads_dir}
+		set_dir ${temp_extract_dir}
 		ubuntu_install
-
 fi
 shopt -u nocasematch

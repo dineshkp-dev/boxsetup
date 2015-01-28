@@ -31,9 +31,9 @@ declare -a ubunutu_downloads_installer_type # Holds an array of installer types 
 declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
 num_of_programs_to_install=0
 user_requested_program_count=0
-temp_downloads_dir="/tmp/boxsetup_downloads_dir/"
-temp_extract_dir="${temp_downloads_dir}boxsetup_extract_dir/"
-program_install_dir="/usr/bin/"
+temp_downloads_dir="/tmp/boxsetup/downloads_dir/"
+temp_extract_dir="/tmp/boxsetup/extract_dir/"
+program_install_dir="/opt/"
 
 
 
@@ -46,13 +46,15 @@ else
 	inputfile=$1
 fi
 
+shopt -s nocasematch 
+
 # The set_dir function checks if a directory exists, 
 #if it doesnt exist, it creates
 function set_dir {
 	if [ ! -d "$1" ]
 		then
 		echo "Directory did not exist, creating new directory $1"
-		mkdir -p "$1"
+		mkdir -p $1
 	fi
 }
 
@@ -85,7 +87,7 @@ function printAllPrograms {
 	done
 }
 
-shopt -s nocasematch 
+
 
 function readDownloadLinksFile {
 	echo "--------------------------------------"
@@ -184,9 +186,11 @@ function make_program_cli_accessible {
 	# Note: auto installed programs DO NOT call this function
 
 	# ln -s $target_name $link_name --target-directory="/usr/bin/"
+	echo "In make program cli accessible."
 }
 
 function create_desktop_icon {
+	echo "In create desktop function"
 	# Function to create a desktop icon for the program
 	# Note: auto installed programs DO NOT call this function
 }
@@ -195,9 +199,10 @@ function http_wget_download {
 	# param 1 -> program name; param 2 -> program URI
 	echo "Downloading files for '$1' from '$2'"
 	echo "Files will be downloaded to the directory: ${temp_downloads_dir}."
-	wget -P ${temp_downloads_dir} -da ${http_downloads_log_file}_$1 -nc $2
+	wget --restrict-file-names=unix -P ${temp_downloads_dir} -da ${http_downloads_log_file}_$1 -nc $2
 	# TODO extract
-	sh extract_installer.sh ${temp_downloads_dir}/* ${temp_extract_dir}
+	#exit 0;
+	/bin/bash extract_installer.sh  "${temp_downloads_dir}*" "${temp_extract_dir}"
 	if [[ $? ]]
 		then
 			echo "Succesfully extracted $1 to $temp_extract_dir"
@@ -208,7 +213,7 @@ function http_wget_download {
 	# TODO remove downloaded dirs/files
 	# rm -rf "${temp_downloads_dir}/*"
 	# TODO move extracted files to /bin or user defined directory
-	mv "$temp_extract_dir" "$program_install_dir"
+	mv "$temp_extract_dir*" "$program_install_dir"
 	make_program_cli_accessible
 	create_desktop_icon
 
@@ -243,7 +248,7 @@ linuxDistro="ubuntu"
 echo "User entered: '$linuxDistro'"
 echo "Enter the location for the programs to be installed :"
 #read program_install_dir
-program_install_dir="tempdir/" #hardcoded temporary location
+#program_install_dir="tempdir/" #hardcoded temporary location
 # if the directory doesnt exist, create one
 set_dir "$program_install_dir"
 

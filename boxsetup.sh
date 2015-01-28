@@ -22,6 +22,18 @@ http_downloads_log_file="installation.log"
 # zip
 # rpm
 # deb
+int=0
+declare -a programs
+declare -a download_links
+declare -a ubuntu_download_links # contains the narrowed down list (based on the 'distro' and User preference) of links
+declare -a ubunutu_downloads_program_name # Holds an array of names of programs for an item from 'download_links' file
+declare -a ubunutu_downloads_installer_type # Holds an array of installer types for an item from 'download_links' file
+declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
+num_of_programs_to_install=0
+user_requested_program_count=0
+temp_downloads_dir="/tmp/boxsetup_downloads_dir/"
+temp_extract_dir="${temp_downloads_dir}boxsetup_extract_dir/"
+program_install_dir="/usr/bin/"
 
 
 
@@ -86,11 +98,6 @@ function readDownloadLinksFile {
 	# do
 	# echo $downloadsEntry
 	# done
-}
-
-function ubuntu_download {
-	echo "Installing programs for Ubuntu"
-	echo "wget ${programs[@]}"
 }
 
 function get_ubuntu_downloads_list {
@@ -164,8 +171,24 @@ function ubuntu_auto_install {
 }
 
 function http_wget_download {
+	# param 1 -> program name; param 2 -> program URI
 	echo "Downloading files for '$1' from '$2'"
-	wget -P ${installation_directory} -da ${http_downloads_log_file}_$1 -nc $2
+	echo "Files will be downloaded to the directory: ${temp_downloads_dir}."
+	wget -P ${temp_downloads_dir} -da ${http_downloads_log_file}_$1 -nc $2
+	# TODO extract
+	sh extract_installer.sh ${temp_downloads_dir}/* ${temp_extract_dir}
+	if [[ $? ]]
+		then
+			echo "Succesfully extracted $1 to $temp_extract_dir"
+		else
+			echo "Some exception occured. Please check the log files."
+			exit -1
+		fi
+	# TODO remove downloaded dirs/files
+	# rm -rf "${temp_downloads_dir}/*"
+	# TODO move extracted files to /bin or user defined directory
+	mv "$temp_extract_dir" 
+
 }
 
 function ubuntu_install {
@@ -183,30 +206,31 @@ function ubuntu_install {
 		fi
 		i=$((i+1))
 	done
-
 }
 
-
-int=0
-declare -a programs
-declare -a download_links
-declare -a ubuntu_download_links # contains the narrowed down list (based on the 'distro' and User preference) of links
-declare -a ubunutu_downloads_program_name # Holds an array of names of programs for an item from 'download_links' file
-declare -a ubunutu_downloads_installer_type # Holds an array of installer types for an item from 'download_links' file
-declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
-num_of_programs_to_install=0
-user_requested_program_count=0
-installation_directory="/tmp/boxsetup/"
-
+function check_if_dir_exists {
+	if [ ! -d "$1" ]
+		then
+		echo "Directory did not exist, creating new directory $1"
+		mkdir -p "$1"
+	fi
+}
 
 # No Function calls should be defined below this, to provide clarity.
 echo "STARTING THE SCRIPT..."
 # Get the Distribution type from the User
 echo "Enter the Linux Distribution type[ UBUNTU|RHEL|DEBIAN ] :"
 #read linuxDistro
-linuxDistro="ubunTU"
+linuxDistro="ubuntu"
 echo "User entered: '$linuxDistro'"
-
+echo "Enter the location for the programs to be installed :"
+#read program_install_dir
+program_install_dir=tempdir #hardcoded temporary location
+# if the directory doesnt exist, create one
+if [ ! -d "$program_install_dir"]
+	then
+	mkdir -p "$program_install_dir"
+fi
 
 readProgramfile $inputfile
 readDownloadLinksFile
@@ -225,8 +249,9 @@ if [[ $linuxDistro == "ubuntu" ]];
 		echo "*****************"
 		echo "Obtained the programs to install and their install/download details from the respective files."
 		echo "now selecting the type of installer/downloader to use"
-		echo "Creating an installation directory at '${installation_directory}' "
-		mkdir ${installation_directory}
+		echo "Creating an installation directory at '${temp_downloads_dir}' "
+		mkdir ${temp_downloads_dir}
+		mkdir ${temp_extract_dir}
 		ubuntu_install
 
 fi

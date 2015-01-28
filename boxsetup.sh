@@ -182,6 +182,8 @@ function ubuntu_auto_install {
 function make_program_cli_accessible {
 	# Function to add a soft-link to the program's executable bin/jar/sh
 	# Note: auto installed programs DO NOT call this function
+
+	# ln -s $target_name $link_name --target-directory="/usr/bin/"
 }
 
 function create_desktop_icon {
@@ -207,6 +209,8 @@ function http_wget_download {
 	# rm -rf "${temp_downloads_dir}/*"
 	# TODO move extracted files to /bin or user defined directory
 	mv "$temp_extract_dir" "$program_install_dir"
+	make_program_cli_accessible
+	create_desktop_icon
 
 }
 

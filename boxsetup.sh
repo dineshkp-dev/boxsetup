@@ -126,8 +126,8 @@ function get_ubuntu_downloads_list {
 	#echo ${download_links[@]}
 	for downloadsEntry in ${download_links[@]}
 	do
-		distro=$(echo $downloadsEntry | awk -F'_' {'print $1'})
-		program_name=$(echo $downloadsEntry | awk -F'_' {'print $2'})
+		distro=$(echo $downloadsEntry | awk -F':==:' {'print $1'})
+		program_name=$(echo $downloadsEntry | awk -F':==:' {'print $2'})
 		for program in ${programs[@]}
 		do
 			if [[ "${distro}" == "ubuntu" ]] && [[ "${program_name}" == "${program}" ]]
@@ -159,14 +159,14 @@ function get_ubuntu_install_details {
 	echo "INSTALLING THE FOLLOWING PROGRAMS:"
 	for ubuntu_entry in ${ubuntu_download_links[@]}
 	do
-		program_name=$(echo $ubuntu_entry | awk -F'_' {'print $2'})
-		installer_type=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $1'})
-		executable_name=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $2'})
-		installer_location=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $3'})
-		# installer_location=$(echo $ubuntu_entry | awk -F':=' {'print $2'})
+		program_name=$(echo $ubuntu_entry | awk -F':==:' {'print $2'})
+		installer_type=$(echo $ubuntu_entry | awk -F':==:' {'print $3'})
+		executable_name=$(echo $ubuntu_entry | awk -F':==:' {'print $4'})
+		installer_location=$(echo $ubuntu_entry | awk -F':==:' {'print $5'})
+
 		ubunutu_downloads_program_name[counter]="${program_name}"
 		ubunutu_downloads_installer_type[counter]="${installer_type}"
-		ubuntu_executable_name[counter]="${program_name}"
+		ubuntu_executable_name[counter]="${executable_name}"
 		ubunutu_installer_location[counter]="${installer_location}"
 	echo " 			program: ${ubunutu_downloads_program_name[counter]}	
  			installer: ${ubunutu_downloads_installer_type[counter]}	
@@ -195,7 +195,13 @@ function make_program_cli_accessible {
 
 	# ln -s $target_name $link_name --target-directory="/usr/bin/"
 	echo "Creating a symbolic link for program access."
-	ln -s "${program_install_dir}${1}/${2}" --target-directory="${app_bin_dir}"
+	echo "${program_install_dir}"
+	echo "${1}"
+	echo "${2}"
+	echo "${app_bin_dir}"
+	ln -s "${2}"
+	mv ${1} "${app_bin_dir}"
+#--target-directory="${app_bin_dir}"
 }
 
 function create_desktop_icon {
@@ -250,7 +256,7 @@ function http_wget_download {
 	# provide the extracted directory name and the executable name to the function
 	executable_location="${program_install_dir}${extracted_dir_name}/${3}"
 
-	make_program_cli_accessible "${executable_location}"
+	make_program_cli_accessible "${3}" "${executable_location}"
 	create_desktop_icon "$3" "${executable_location}"
 
 }

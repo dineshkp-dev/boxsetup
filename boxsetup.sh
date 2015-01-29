@@ -194,18 +194,37 @@ function make_program_cli_accessible {
 	# Note: auto installed programs DO NOT call this function
 
 	# ln -s $target_name $link_name --target-directory="/usr/bin/"
-	echo "In make program cli accessible."
-	ln -s "${program_install_dir}${1}/${3}" --target-directory="${app_bin_dir}"
+	echo "Creating a symbolic link for program access."
+	ln -s "${program_install_dir}${1}/${2}" --target-directory="${app_bin_dir}"
 }
 
 function create_desktop_icon {
-	echo "In create desktop function"
+	local shortcut_name="$1"
+	local executable_location="${3}"
+	echo "Creating a Desktop shortcut for the Program."
+	
 	# Function to create a desktop icon for the program
 	# Note: auto installed programs DO NOT call this function
+	#
+	#
+	# #!/bin/bash
+	# variabl_inside="local var"
+	# #desktop_loc="${HOME}/Desktop/"
+	# desktop_loc="${HOME}/"
+	# desktop_shortcut_name="Sublime.desktop"
+	# echo "
+	#       This is
+	#       What that
+	#       needs to go
+	#       in the other file and this ${variabl_inside}" >$desktop_loc$desktop_shortcut_name
+	# echo "Done!"
+
 }
 
 function http_wget_download {
-	# param 1 -> program name; param 2 -> program URI
+	# param 1 -> program name; param 2 -> program URI; param 3 -> executable name
+	local executable_location
+
 	echo "Downloading files for '$1' from '$2'"
 	echo "Files will be downloaded to the directory: ${temp_downloads_dir}."
 	wget --restrict-file-names=unix -P ${temp_downloads_dir} -da ${http_downloads_log_file}_$1 -nc $2
@@ -229,8 +248,10 @@ function http_wget_download {
 	mv "${temp_extract_dir}"* "${program_install_dir}"
 	# TODO call the make_program_cli_accessible function to make a symbolic link to the program's executable
 	# provide the extracted directory name and the executable name to the function
-	make_program_cli_accessible "${extracted_dir_name}" "$3"
-	create_desktop_icon
+	executable_location="${program_install_dir}${extracted_dir_name}/${3}"
+
+	make_program_cli_accessible "${executable_location}"
+	create_desktop_icon "$3" "${executable_location}"
 
 }
 

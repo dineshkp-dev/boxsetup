@@ -28,12 +28,15 @@ declare -a download_links
 declare -a ubuntu_download_links # contains the narrowed down list (based on the 'distro' and User preference) of links
 declare -a ubunutu_downloads_program_name # Holds an array of names of programs for an item from 'download_links' file
 declare -a ubunutu_downloads_installer_type # Holds an array of installer types for an item from 'download_links' file
+declare -a ubuntu_executable_name # Holds an array of executable names for an item from 'download_links' file
 declare -a ubunutu_installer_location # Holds an array of locations (for 'http' type) or names (for 'auto-installer' type) for an item from 'download_links' file
 num_of_programs_to_install=0
 user_requested_program_count=0
 temp_downloads_dir="/tmp/boxsetup/downloads_dir/"
 temp_extract_dir="/tmp/boxsetup/extract_dir/"
 program_install_dir="/opt/"
+extracted_dir_name=""
+app_bin_dir="/usr/bin/"
 
 
 
@@ -149,6 +152,7 @@ function get_ubuntu_install_details {
 	echo "Getting install details for Ubuntu"
 	echo "wget ${programs[@]}"
 	local installer_type=""
+	local executable_name=""
 	local program_name=""
 	local installer_location=""
 	local counter=0
@@ -157,12 +161,16 @@ function get_ubuntu_install_details {
 	do
 		program_name=$(echo $ubuntu_entry | awk -F'_' {'print $2'})
 		installer_type=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $1'})
-		installer_location=$(echo $ubuntu_entry | awk -F':=' {'print $2'})
-		ubunutu_downloads_program_name[counter]=$program_name
-		ubunutu_downloads_installer_type[counter]=$installer_type
-		ubunutu_installer_location[counter]=$installer_location
+		executable_name=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $2'})
+		installer_location=$(echo $ubuntu_entry | awk -F'_' {'print $3'} | awk -F':=' {'print $3'})
+		# installer_location=$(echo $ubuntu_entry | awk -F':=' {'print $2'})
+		ubunutu_downloads_program_name[counter]="${program_name}"
+		ubunutu_downloads_installer_type[counter]="${installer_type}"
+		ubuntu_executable_name[counter]="${program_name}"
+		ubunutu_installer_location[counter]="${installer_location}"
 	echo " 			program: ${ubunutu_downloads_program_name[counter]}	
  			installer: ${ubunutu_downloads_installer_type[counter]}	
+ 			executable name: ${ubuntu_executable_name[counter]}
  			installer location: ${ubunutu_installer_location[counter]}"
 		counter=$((counter+1))
 	done
@@ -187,6 +195,7 @@ function make_program_cli_accessible {
 
 	# ln -s $target_name $link_name --target-directory="/usr/bin/"
 	echo "In make program cli accessible."
+	ln -s "${program_install_dir}${1}/${3}" --target-directory="${app_bin_dir}"
 }
 
 function create_desktop_icon {
@@ -212,9 +221,15 @@ function http_wget_download {
 		fi
 	# TODO remove downloaded dirs/files
 	# rm -rf "${temp_downloads_dir}/*"
-	# TODO move extracted files to /bin or user defined directory
-	mv "$temp_extract_dir*" "$program_install_dir"
-	make_program_cli_accessible
+
+	# TODO get the directory name into a var and use it for refernce
+	extracted_dir_name="$(ls -1 ${temp_extract_dir})"
+	echo "'$1' has been extracted to directory: '$extracted_dir_name'"
+	# TODO move extracted files to /opt or user defined directory
+	mv "${temp_extract_dir}"* "${program_install_dir}"
+	# TODO call the make_program_cli_accessible function to make a symbolic link to the program's executable
+	# provide the extracted directory name and the executable name to the function
+	make_program_cli_accessible "${extracted_dir_name}" "$3"
 	create_desktop_icon
 
 }
@@ -227,9 +242,11 @@ function ubuntu_install {
 		echo "${ubunutu_downloads_program_name[i]}, ${ubunutu_downloads_installer_type[i]}, ${ubunutu_installer_location[i]}"
 		if [[ ${ubunutu_downloads_installer_type[i]} == http ]]
 		then
-			http_wget_download ${ubunutu_downloads_program_name[i]} ${ubunutu_installer_location[i]}
+			# Type is 'http': Call the http_wget_download function to download, extract and install the program
+			http_wget_download "${ubunutu_downloads_program_name[i]}" "${ubunutu_installer_location[i]}" "${ubuntu_executable_name[i]}"
 		elif [[ ${ubunutu_downloads_installer_type[i]} == auto ]]
 		then
+			# Type is 'auto': Call the http_wget_download function to use the default package manager to download and install the program
 			ubuntu_auto_install ${ubunutu_installer_location[i]}
 		else
 			echo "Unknown Installer type encountered, please check the installation file."

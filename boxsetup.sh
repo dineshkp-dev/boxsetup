@@ -14,14 +14,6 @@ ubuntu_autoinstaller="sudo apt-get install "
 fedora_autoinstaller="sudo yum install "
 debian_autoinstaller="sudo apt-get install "
 http_downloads_log_file="installation.log"
-# Defining the different types of downloadable file formats
-# tar
-# tar.gz
-# tar.bz2
-# gzip
-# zip
-# rpm
-# deb
 int=0
 declare -a programs
 declare -a download_links
@@ -48,7 +40,7 @@ then
 else
 	inputfile=$1
 fi
-
+# All string comparison will be case-insensitive.
 shopt -s nocasematch 
 
 # The set_dir function checks if a directory exists, 
@@ -193,43 +185,59 @@ function make_program_cli_accessible {
 	# Function to add a soft-link to the program's executable bin/jar/sh
 	# Note: auto installed programs DO NOT call this function
 
-	# ln -s $target_name $link_name --target-directory="/usr/bin/"
-	echo "Creating a symbolic link for program access."
-	echo "${program_install_dir}"
-	echo "${1}"
-	echo "${2}"
-	echo "${app_bin_dir}"
+	echo "Creating a symbolic link named '${1}' at '${app_bin_dir}', for easy program access."
+
 	ln -s "${2}"
-	mv ${1} "${app_bin_dir}"
-#--target-directory="${app_bin_dir}"
+	mv "${1}" "${app_bin_dir}"
 }
 
 function create_desktop_icon {
+	echo "Creating a Desktop shortcut for the Program."
+
+	echo "[Desktop Entry]">"${1}.desktop"
+	echo "Name=${1}">>"${1}.desktop"
+	echo "Comment=${1} Program.">>"${1}.desktop"
+	echo "Exec=${1} %U">>"${1}.desktop"
+	echo "Icon=${3}/Icon/48x48/sublime_text.png">>"${1}.desktop"
+	echo "Terminal=false">>"${1}.desktop"
+	echo "Type=Application">>"${1}.desktop"
+	echo  "Categories=GNOME;GTK;Utility;TextEditor;">>"${1}.desktop"
+	echo "GenericName=Text Editor">>"${1}.desktop"
+	chmod 775 "${1}.desktop"
+	echo "Done"
+}
+
+function create_desktop_icon_factory {
+	# param 1 -> executable_name; param 2 -> executable_location; param 3 -> program_directory; param 4 -> program_name;
 	local shortcut_name="$1"
-	local executable_location="${3}"
+	local executable_location="${2}"
+	local program_extract_dir="${3}"
+	local program_name="${4}"
 	echo "Creating a Desktop shortcut for the Program."
 	
-	# Function to create a desktop icon for the program
-	# Note: auto installed programs DO NOT call this function
-	#
-	#
-	# #!/bin/bash
-	# variabl_inside="local var"
-	# #desktop_loc="${HOME}/Desktop/"
-	# desktop_loc="${HOME}/"
-	# desktop_shortcut_name="Sublime.desktop"
-	# echo "
-	#       This is
-	#       What that
-	#       needs to go
-	#       in the other file and this ${variabl_inside}" >$desktop_loc$desktop_shortcut_name
-	# echo "Done!"
+	echo "${1}"
+	echo "${2}"
+	echo "${3}"
+	echo "${4}"
 
+	if [[ program_name=="sublime" ]]
+		then
+			create_desktop_icon "${shortcut_name}" "${executable_location}" "${program_extract_dir}"
+		else
+			echo "Error occured! Unexpected Program name encountered ${program_name}."
+			exit -1;
+		fi
+	
+	echo "Done"
 }
 
 function http_wget_download {
 	# param 1 -> program name; param 2 -> program URI; param 3 -> executable name
-	local executable_location
+	local program_name="${1}"
+	local executable_name="${3}"
+	local executable_location=""
+	local program_extract_dir=""
+	
 
 	echo "Downloading files for '$1' from '$2'"
 	echo "Files will be downloaded to the directory: ${temp_downloads_dir}."
@@ -249,15 +257,17 @@ function http_wget_download {
 
 	# TODO get the directory name into a var and use it for refernce
 	extracted_dir_name="$(ls -1 ${temp_extract_dir})"
-	echo "'$1' has been extracted to directory: '$extracted_dir_name'"
+
+	echo "'${program_name}' has been extracted to directory: '${extracted_dir_name}'"
 	# TODO move extracted files to /opt or user defined directory
 	mv "${temp_extract_dir}"* "${program_install_dir}"
 	# TODO call the make_program_cli_accessible function to make a symbolic link to the program's executable
 	# provide the extracted directory name and the executable name to the function
-	executable_location="${program_install_dir}${extracted_dir_name}/${3}"
+	executable_location="${program_install_dir}${extracted_dir_name}/${executable_name}"
 
-	make_program_cli_accessible "${3}" "${executable_location}"
-	create_desktop_icon "$3" "${executable_location}"
+	make_program_cli_accessible "${executable_name}" "${executable_location}"
+	program_extract_dir="${program_install_dir}${extracted_dir_name}"
+	create_desktop_icon_factory "${executable_name}" "${executable_location}" "${program_extract_dir}" "${program_name}"
 
 }
 

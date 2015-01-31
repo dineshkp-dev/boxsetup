@@ -1,6 +1,8 @@
 ubuntu:==:dropbox:==:http:==:https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
-ubuntu:==:eclipse:==:http:==:http://download.nus.edu.sg/mirror/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz
+ubuntu:==:eclipse:==:http:==:eclipse:==:http://download.nus.edu.sg/mirror/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz
 ubuntu:==:chrome:==:auto:==:google-chrome-stable
+ubuntu:==:java:==:auto:==:openjdkjre:==:openjdk-7-jre
+ubuntu:==:javaJDK:==:auto:==:openjdk:==:openjdk-7-jdk
 ubuntu:==:sublime:==:http:==:sublime_text:==:http://c758482.r82.cf2.rackcdn.com/Sublime%20Text%202.0.2%20x64.tar.bz2
 fedora:==:dropbox:==:http:==:https://www.dropbox.com/download?dl=packages/ubuntu/dropbox_1.6.2_amd64.deb
 fedora:==:eclipse:==:http:==:http://download.nus.edu.sg/mirror/eclipse//technology/epp/downloads/release/luna/SR1/eclipse-java-luna-SR1-linux-gtk-x86_64.tar.gz

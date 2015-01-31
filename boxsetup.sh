@@ -10,7 +10,7 @@ program=""
 dropbox_ubuntu=""
 download_links_file="download_links"
 # Defining the different installers for different distribution
-ubuntu_autoinstaller="sudo apt-get install "
+ubuntu_autoinstaller="sudo apt-get install -y "
 fedora_autoinstaller="sudo yum install "
 debian_autoinstaller="sudo apt-get install "
 http_downloads_log_file="installation.log"
@@ -169,18 +169,6 @@ function get_ubuntu_install_details {
 	num_of_programs_to_install=$counter
 }
 
-function ubuntu_auto_install {
-	echo "Installing applications for Ubuntu using '${ubuntu_autoinstaller} $1'"
-	sh echo ${ubuntu_autoinstaller} $1 # Must remove the 'echo' to ensure proper command.
-	if [[ $? ]]
-	then
-		echo "Installed chrome Succesfully."
-	else
-		echo "Some exception occured while trying to install '$1'"
-		exit -1
-	fi
-}
-
 function make_program_cli_accessible {
 	# Function to add a soft-link to the program's executable bin/jar/sh
 	# Note: auto installed programs DO NOT call this function
@@ -191,20 +179,38 @@ function make_program_cli_accessible {
 	mv "${1}" "${app_bin_dir}"
 }
 
-function create_desktop_icon {
-	echo "Creating a Desktop shortcut for the Program."
+function create_desktop_icon_sublime {
+	# param 1 -> shortcut_name; param 2 -> executable location; param 3 -> program directory;
+	echo "Creating a Desktop shortcut for ${1}."
 
 	echo "[Desktop Entry]">"${1}.desktop"
 	echo "Name=${1}">>"${1}.desktop"
 	echo "Comment=${1} Program.">>"${1}.desktop"
-	echo "Exec=${1} %U">>"${1}.desktop"
+	echo "Exec=${2} %U">>"${1}.desktop"
 	echo "Icon=${3}/Icon/48x48/sublime_text.png">>"${1}.desktop"
 	echo "Terminal=false">>"${1}.desktop"
 	echo "Type=Application">>"${1}.desktop"
 	echo  "Categories=GNOME;GTK;Utility;TextEditor;">>"${1}.desktop"
 	echo "GenericName=Text Editor">>"${1}.desktop"
 	chmod 775 "${1}.desktop"
-	echo "Done"
+	echo "Created desktop shortcut ${1}.desktop."
+}
+
+function create_desktop_icon_eclipse {
+	# param 1 -> shortcut_name; param 2 -> executable location; param 3 -> program directory;
+	echo "Creating a Desktop shortcut for ${1}."
+
+	echo "[Desktop Entry]">"${1}.desktop"
+	echo "Name=${1}">>"${1}.desktop"
+	echo "Comment=${1} Program.">>"${1}.desktop"
+	echo "Exec=${2} %U">>"${1}.desktop"
+	echo "Icon=${3}/icon.xpm">>"${1}.desktop"
+	echo "Terminal=false">>"${1}.desktop"
+	echo "Type=Application">>"${1}.desktop"
+	echo "Categories=GNOME;GTK;Utility;IDE;">>"${1}.desktop"
+	echo "GenericName=Eclipse IDE">>"${1}.desktop"
+	chmod 775 "${1}.desktop"
+	echo "Created desktop shortcut ${1}.desktop."
 }
 
 function create_desktop_icon_factory {
@@ -220,9 +226,11 @@ function create_desktop_icon_factory {
 	echo "${3}"
 	echo "${4}"
 
-	if [[ program_name=="sublime" ]]
+	if [[ "${program_name}" = "sublime" ]]
 		then
-			create_desktop_icon "${shortcut_name}" "${executable_location}" "${program_extract_dir}"
+			create_desktop_icon_sublime "${shortcut_name}" "${executable_location}" "${program_extract_dir}"
+		elif [[ "${program_name}" = "eclipse" ]]; then
+			create_desktop_icon_eclipse "${shortcut_name}" "${executable_location}" "${program_extract_dir}"
 		else
 			echo "Error occured! Unexpected Program name encountered ${program_name}."
 			exit -1;
@@ -241,34 +249,57 @@ function http_wget_download {
 
 	echo "Downloading files for '$1' from '$2'"
 	echo "Files will be downloaded to the directory: ${temp_downloads_dir}."
+	# TODO remove downloaded dirs/files
+	# rm -rf "${temp_downloads_dir}/*"
+	# Use wget to download the files
 	wget --restrict-file-names=unix -P ${temp_downloads_dir} -da ${http_downloads_log_file}_$1 -nc $2
 	# TODO extract
-	#exit 0;
+	# exit 0;
 	/bin/bash extract_installer.sh  "${temp_downloads_dir}*" "${temp_extract_dir}"
 	if [[ $? ]]
 		then
 			echo "Succesfully extracted $1 to $temp_extract_dir"
+			# TODO remove downloaded dirs/files
+			rm -rf "${temp_downloads_dir}"*
+			echo "removed ${temp_downloads_dir}*"
 		else
 			echo "Some exception occured. Please check the log files."
 			exit -1
 		fi
-	# TODO remove downloaded dirs/files
-	# rm -rf "${temp_downloads_dir}/*"
 
 	# TODO get the directory name into a var and use it for refernce
 	extracted_dir_name="$(ls -1 ${temp_extract_dir})"
-
 	echo "'${program_name}' has been extracted to directory: '${extracted_dir_name}'"
+	
 	# TODO move extracted files to /opt or user defined directory
 	mv "${temp_extract_dir}"* "${program_install_dir}"
+	program_extract_dir="${program_install_dir}${extracted_dir_name}"
+	# Clean the extract directory, even if the move fails.
+	rm -rf "${temp_extract_dir}"*
+
 	# TODO call the make_program_cli_accessible function to make a symbolic link to the program's executable
 	# provide the extracted directory name and the executable name to the function
 	executable_location="${program_install_dir}${extracted_dir_name}/${executable_name}"
 
 	make_program_cli_accessible "${executable_name}" "${executable_location}"
-	program_extract_dir="${program_install_dir}${extracted_dir_name}"
+	
 	create_desktop_icon_factory "${executable_name}" "${executable_location}" "${program_extract_dir}" "${program_name}"
+}
 
+
+function ubuntu_auto_install {
+	# param 1 -> program name; param 2 -> program URI;
+	local program_name="${1}"
+	local program_uri="${2}"
+	echo "Installing '${program_name}' for Ubuntu using '${ubuntu_autoinstaller}${program_uri}'"
+	${ubuntu_autoinstaller}${program_uri} # Must remove the 'echo' to ensure proper command.
+	if [[ $? ]]
+	then
+		echo "Installed ${program_name} Succesfully."
+	else
+		echo "Some exception occured while trying to install '$1'"
+		exit -1
+	fi
 }
 
 function ubuntu_install {
@@ -276,7 +307,7 @@ function ubuntu_install {
 	local i=0
 	while [[ $i -lt $num_of_programs_to_install ]]
 	do
-		echo "${ubunutu_downloads_program_name[i]}, ${ubunutu_downloads_installer_type[i]}, ${ubunutu_installer_location[i]}"
+		echo "${ubunutu_downloads_program_name[i]}, ${ubunutu_downloads_installer_type[i]}, ${ubunutu_installer_location[i]}" > log_file.log
 		if [[ ${ubunutu_downloads_installer_type[i]} == http ]]
 		then
 			# Type is 'http': Call the http_wget_download function to download, extract and install the program
@@ -284,7 +315,8 @@ function ubuntu_install {
 		elif [[ ${ubunutu_downloads_installer_type[i]} == auto ]]
 		then
 			# Type is 'auto': Call the http_wget_download function to use the default package manager to download and install the program
-			ubuntu_auto_install ${ubunutu_installer_location[i]}
+			echo "Using auto-installer..."
+			ubuntu_auto_install "${ubunutu_downloads_program_name[i]}" "${ubunutu_installer_location[i]}"
 		else
 			echo "Unknown Installer type encountered, please check the installation file."
 			exit -1

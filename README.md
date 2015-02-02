@@ -12,20 +12,20 @@ The programs that are currently supported are:
 - java jre (open jdk 1.7)
 - java jdk (open jdk 1.7)
 
-The script should be able to do the following steps:
+The script is able to do the following steps for UBUNTU OS for 'manual' setup:
 - Identify which files need to be installed - from User through the 'programs.txt' file.
 - Download the setup files
-	- place setup files in a temp location
-	- extract files
-	- create a bin link for execution
-	- create a '.desktop' file or copy one if already available
-
+- Place setup files in a temp location (<code>/tmp/boxsetup/</code>).
+- Extract files to the programs directory (<code>/opt</code>).
+- Create a bin link for CLI-execution.
+- Create a '.desktop' file for the User.
+The script is able to do the following steps for UBUNTU OS for 'manual' setup:
+- Use the appropriate packaging tool to download and install the file. (<code>apt-get</code>)
 Executing the Script:
 ====================
-- Download the files, and extract them into a directory.
-- On a terminal (pointing to the directory) type:
+- Download the files from this repository, and extract them into a directory.
+- On a terminal go to the directory containing the script and type in the following code :
 	<code>sudo ./boxsetup.sh</code>
-
 Notes:
 ======
 - New programs will be installed to '/opt/new_program/' directory.

@@ -21,13 +21,16 @@ The script is able to do the following steps for UBUNTU OS for 'manual' setup:
 - Create a '.desktop' file for the User.
 The script is able to do the following steps for UBUNTU OS for 'manual' setup:
 - Use the appropriate packaging tool to download and install the file. (<code>apt-get</code>)
+
 Executing the Script:
-====================
+========
 - Download the files from this repository, and extract them into a directory.
 - On a terminal go to the directory containing the script and type in the following code :
+
 	<code>sudo ./boxsetup.sh</code>
+
 Notes:
-======
+========
 - New programs will be installed to '/opt/new_program/' directory.
 - The script uses the '/tmp/' directory as the temporary directory to download and extract the files from their respective sites.
 	

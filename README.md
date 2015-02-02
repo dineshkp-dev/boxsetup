@@ -1,4 +1,4 @@
-boxsetup
+BOXSETUP
 ========
 
 Create a BASH script that would be able to automatically download programs and setup programs on a freshly installed Linux Machine.

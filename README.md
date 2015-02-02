@@ -25,12 +25,21 @@ The script is able to do the following steps for UBUNTU OS for 'manual' setup:
 Executing the Script:
 ========
 - Download the files from this repository, and extract them into a directory.
-- On a terminal go to the directory containing the script and type in the following code :
+- On a terminal go to the directory containing the script.
+- Edit the 'programs.txt' file and add-in the programs (one program name as below, per line) that needs to be installed. Currently, the following programs can be installed:
+	- <code>sublime</code>
+	- <code>eclipse</code>
+	- <code>java</code>
+	- <code>javajdk</code>
+	
+- type in the following code :
 
 	<code>sudo ./boxsetup.sh</code>
+- All the programs will be installed without any other human intervention. 
 
 Notes:
 ========
 - New programs will be installed to '/opt/new_program/' directory.
 - The script uses the '/tmp/' directory as the temporary directory to download and extract the files from their respective sites.
+- If you see any issues, kindly raise an 'issue' ticket and we will work to fix it as soon as possible.
 	

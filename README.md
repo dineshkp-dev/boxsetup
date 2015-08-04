@@ -9,6 +9,8 @@ The programs that are currently supported are:
 - eclipse
 - sublime 2.0
 (Auto Install)
+- chrome
+- git
 - java jre (open jdk 1.7)
 - java jdk (open jdk 1.7)
 

@@ -45,3 +45,9 @@ Notes:
 - The script uses the '/tmp/' directory as the temporary directory to download and extract the files from their respective sites.
 - If you see any issues, kindly raise an 'issue' ticket and we will work to fix it as soon as possible.
 	
+Other notes:
+http://bernaerts.dyndns.org/linux/74-ubuntu/328-ubuntu-trusty-android-adb-fastboot-qtadb
+Pull entire directory:
+adb pull "/sdcard/Folder1"
+http://stackoverflow.com/questions/59838/check-if-a-directory-exists-in-a-shell-script
+
